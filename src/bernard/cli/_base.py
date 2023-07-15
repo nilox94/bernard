@@ -53,12 +53,14 @@ def main():
     # noinspection PyBroadException
     try:
         from aiohttp import web
+        from asyncio import get_event_loop
 
         from bernard.platforms import start_all
         from bernard.server import app
         from bernard.utils import run
 
-        run(start_all())
+        loop = get_event_loop()
+        run(start_all(), loop)
 
         if settings.CODE_LIVE_RELOAD:
             init_live_reload(False)
@@ -69,4 +71,4 @@ def main():
             init_live_reload(True)
     else:
         # noinspection PyArgumentList
-        web.run_app(app, **settings.SERVER_BIND)
+        web.run_app(app, loop=loop, **settings.SERVER_BIND)

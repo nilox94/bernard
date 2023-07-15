@@ -1,10 +1,11 @@
 import asyncio
 import importlib
 import re
-from asyncio import iscoroutine
+from asyncio import AbstractEventLoop, iscoroutine
 from itertools import chain
 from typing import (
     Any,
+    Awaitable,
     Coroutine,
     Dict,
     Iterator,
@@ -14,9 +15,12 @@ from typing import (
     Text,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+
+T = TypeVar("T")
 
 
 def import_class(name: Text) -> Type:
@@ -33,14 +37,15 @@ def import_class(name: Text) -> Type:
     return getattr(module_, class_name)
 
 
-def run(task: Coroutine) -> Any:
+def run(coro: Awaitable[T], loop: AbstractEventLoop = None) -> T:
     """
-    Run a task in the default asyncio look.
+    Run a coroutine in a given loop.
 
-    :param task: Task to run
+    :param coro: Coroutine or awaitable to run
+    :param loop: Loop to run the coroutine in, defaults to the default asyncio loop
     """
-
-    return asyncio.get_event_loop().run_until_complete(task)
+    loop = loop or asyncio.get_event_loop()
+    return loop.run_until_complete(coro)
 
 
 async def run_or_return(task: Union[Coroutine, Any]):
