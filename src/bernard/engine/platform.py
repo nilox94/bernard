@@ -160,6 +160,10 @@ class SimplePlatform(Platform):
         self.session = aiohttp.ClientSession()
         asyncio.get_event_loop().create_task(self._deferred_init())
 
+    def __del__(self):
+        if self.session:
+            asyncio.get_event_loop().run_until_complete(self.session.close())
+
     async def _deferred_init(self):
         """
         Run those things in a sepearate tasks as they are not required for the
